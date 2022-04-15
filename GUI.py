@@ -204,7 +204,7 @@ class Ui_MainWindow(object):
 			list=str.split(',')
 			list[0]=int(list[0])
 			list[1]=int(list[1])
-			list[2]=float(list[2])
+			list[2]=1.0/float(list[2])
 			if(list[2]<0):
 				raise ValueError
 			if(list[0]< 0 or list[0] >=self.graph.nodes or list[1]<0 or list[1]>=self.graph.nodes):
@@ -280,6 +280,7 @@ class Ui_MainWindow(object):
 		# print(power_wire)
 		copy=[x[:] for x in Flows_wire]
 		self.drawgraph_final(copy,power_wire)
+		net_conductance = 1.0/float(net_conductance)
 		self.tv_result.setText(str(net_conductance))
 
 def createWindow():

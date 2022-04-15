@@ -1,9 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
-
-
 class Graph:
 	def __init__(self,vertices=0):
 		self.nodes=vertices
@@ -78,25 +75,19 @@ class Graph:
 		g.clear()
 		plt.close()		
 
-
-
-
-			
-
-
-
-
-
-
-
-
 	def setadjMatrix(self):
 		self.adjMatrix=[[-1]*self.nodes for i in range(self.nodes)]
 		self.rhs=[0.0]*self.nodes
 
-	def add_edge(self,node1,node2,conductance):
+	def add_edge(self,node1,node2,conductance, eps = 1.0/(10**10)):
 		if(node1==node2):
 			return
+
+		# if (conductance == 0.0):
+		# 	conductance = 1.0/eps
+		# else:
+		# 	conductance = 1.0/float(conductance)
+
 		self.adjMatrix[node1][node2]=conductance
 		self.adjMatrix[node2][node1]=conductance
 
@@ -107,15 +98,13 @@ class Graph:
 				self.add_edge(arrinput[i][0],arrinput[i][1],arrinput[i][2])
 			else:
 				r1=self.adjMatrix[arrinput[i][0]][arrinput[i][1]]
-				r2=arrinput[i][2]
+				r2=float(arrinput[i][2])
 				equivalent_conductance=(1/r1)+(1/r2)
+				# equivalent_conductance= r1 + r2
+				
 				equivalent_conductance=1/equivalent_conductance
 				self.add_edge(arrinput[i][0],arrinput[i][1],equivalent_conductance)
 
-
-
-
-	
 	def make_eqns(self,inlet,outlet,netflow):
 		coeffs=[[0.0]*self.nodes for i in range(self.nodes)]
 
