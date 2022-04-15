@@ -274,7 +274,7 @@ class Ui_MainWindow(object):
 		net_conductance,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,1)
 		netFlow=pressure/net_conductance
 		net_pressure,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,netFlow)
-		Flows_wire,power_wire=self.graph.calc_Flow_node(pressure_nodes,self.reduced_elements)
+		Flows_wire,power_wire=self.graph.calc_flow_node(pressure_nodes,self.reduced_elements)
 		print("Flow Supplied=",netFlow)
 		# print(Flows_wire)
 		# print(power_wire)
