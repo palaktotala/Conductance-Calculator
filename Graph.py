@@ -52,23 +52,23 @@ class Graph:
 		g.clear()
 		plt.close()
 
-	def draw_graph_final(self,final_current):
-		print(final_current)
+	def draw_graph_final(self,final_flow):
+		print(final_flow)
 		i=0
-		while i<len(final_current):
-			s=final_current[i][0]
-			d=final_current[i][1]
-			final_current[i][2]=[abs(round(final_current[i][2],2))]
+		while i<len(final_flow):
+			s=final_flow[i][0]
+			d=final_flow[i][1]
+			final_flow[i][2]=[abs(round(final_flow[i][2],2))]
 			j=i+1
-			while(j<len(final_current)):
-				if(final_current[j][0]==s and final_current[j][1]==d):
-					final_current[i][2].append(abs(round(final_current[j][2],2)))
-					del final_current[j]
+			while(j<len(final_flow)):
+				if(final_flow[j][0]==s and final_flow[j][1]==d):
+					final_flow[i][2].append(abs(round(final_flow[j][2],2)))
+					del final_flow[j]
 				j=j+1
 			i=i+1
 		g=nx.Graph()
 		g.clear()
-		for i in final_current:
+		for i in final_flow:
 			g.add_edge(i[0],i[1],c=i[2])
 		pos = nx.spring_layout(g, scale=1.25)
 		nx.draw(g,pos,with_labels=True,edge_color='blue',width=3,linewidths=3,node_color='red',node_size=1700,font_size=25,font_color="black",font_weight="bold")
@@ -116,7 +116,7 @@ class Graph:
 
 
 	
-	def make_eqns(self,inlet,outlet,netCurrent):
+	def make_eqns(self,inlet,outlet,netflow):
 		coeffs=[[0.0]*self.nodes for i in range(self.nodes)]
 
 		print(self.adjMatrix)
@@ -135,12 +135,12 @@ class Graph:
 
 
 		
-		self.rhs[inlet]=netCurrent
-		self.rhs[outlet]=-1.0*netCurrent
+		self.rhs[inlet]=netflow
+		self.rhs[outlet]=-1.0*netflow
 
 		#reducing 1 Variable
 		n=max(inlet,outlet)
-		#removed variable of Node n by substituting Vn=0.0Volts
+		#removed variable of Node n by substituting Vn=0.0press
 		# newcoeffs=[[0.0]*(self.nodes-1) for i in range(self.nodes)]
 		newcoeffs=[]
 		for i,c in enumerate(coeffs):
@@ -246,42 +246,42 @@ class Graph:
 
 
 	def calc_pressure(self,M,x):
-		volt=[0]*(len(M)+1)
+		pres=[0]*(len(M)+1)
 		j=0
 		for i in range(0,len(M)):
-			volt[j]=M[i][i]*M[i][len(M)]
+			pres[j]=M[i][i]*M[i][len(M)]
 			j+=1
 			if j==x:
-				volt[j]=0
+				pres[j]=0
 				j+=1
-		return volt
+		return pres
       
-	def calc_current_node(self,volt,conductances):
-		t=len(volt)
+	def calc_flow_node(self,pres,conductances):
+		t=len(pres)
 		x=len(conductances)
-		currents=[[]for i in range(t)]
-		fcurr=[[]for i in range(x)]
+		flows=[[]for i in range(t)]
+		fflo=[[]for i in range(x)]
 		power=[[]for i in range(t)]
 		fpow=[[]for i in range(x)]
 		for i in range(t):
 			for j in range(t):
-				currents[i].append([])
+				flows[i].append([])
 				power[i].append([])
 		for i in conductances:
-			volt_diff=volt[i[1]]-volt[i[0]]
-			cur=volt_diff/i[2]
-			currents[i[0]][i[1]].append(cur)
+			pres_diff=pres[i[1]]-pres[i[0]]
+			cur=pres_diff/i[2]
+			flows[i[0]][i[1]].append(cur)
 			powr=cur*cur*i[2]
 			power[i[0]][i[1]].append(powr)
 		coef=0
 		coef1=0
 		for i in range(t):
 			for j in range(t):
-				if currents[i][j]!=[]:
-					for k in currents[i][j]:
-						fcurr[coef].append(i)
-						fcurr[coef].append(j)
-						fcurr[coef].append(k)
+				if flows[i][j]!=[]:
+					for k in flows[i][j]:
+						fflo[coef].append(i)
+						fflo[coef].append(j)
+						fflo[coef].append(k)
 						
 						coef+=1
 					for k in power[i][j]:
@@ -291,7 +291,7 @@ class Graph:
 						coef1+=1
 
 
-		return fcurr,fpow
+		return fflo,fpow
 
 
 

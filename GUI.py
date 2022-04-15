@@ -173,7 +173,7 @@ class Ui_MainWindow(object):
 
 
 	def removeitem(self):
-		index=(self.listWidget.currentRow())
+		index=(self.listWidget.FlowRow())
 		self.listWidget.takeItem(index)
 		del self.list_elements[index]
 		
@@ -234,9 +234,9 @@ class Ui_MainWindow(object):
 		pixmap=pixmap.scaled(self.image.width(),self.image.height(),QtCore.Qt.KeepAspectRatio)
 		self.image.setPixmap(pixmap)
 
-	def drawgraph_final(self,currents_wire,power_wire):
+	def drawgraph_final(self,Flows_wire,power_wire):
 		
-		self.graph.draw_graph_final(currents_wire)
+		self.graph.draw_graph_final(Flows_wire)
 		pixmap=QtGui.QPixmap("out_file3.jpg")
 		pixmap=pixmap.scaled(self.image.width(),self.image.height(),QtCore.Qt.KeepAspectRatio)
 		self.image.setPixmap(pixmap)
@@ -272,13 +272,13 @@ class Ui_MainWindow(object):
 
 
 		net_conductance,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,1)
-		netCurrent=pressure/net_conductance
-		net_pressure,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,netCurrent)
-		currents_wire,power_wire=self.graph.calc_current_node(pressure_nodes,self.reduced_elements)
-		print("Current Supplied=",netCurrent)
-		# print(currents_wire)
+		netFlow=pressure/net_conductance
+		net_pressure,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,netFlow)
+		Flows_wire,power_wire=self.graph.calc_Flow_node(pressure_nodes,self.reduced_elements)
+		print("Flow Supplied=",netFlow)
+		# print(Flows_wire)
 		# print(power_wire)
-		copy=[x[:] for x in currents_wire]
+		copy=[x[:] for x in Flows_wire]
 		self.drawgraph_final(copy,power_wire)
 		self.tv_result.setText(str(net_conductance))
 
