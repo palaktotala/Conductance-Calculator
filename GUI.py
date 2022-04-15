@@ -85,12 +85,12 @@ class Ui_MainWindow(object):
 		font.setPointSize(11)
 		self.label_2.setFont(font)
 		self.label_2.setObjectName("label_2")
-		self.tv_source = QtWidgets.QLineEdit(self.centralwidget)
-		self.tv_source.setGeometry(QtCore.QRect(20, 490, 101, 41))
-		self.tv_source.setObjectName("tv_source")
-		self.tv_destination = QtWidgets.QLineEdit(self.centralwidget)
-		self.tv_destination.setGeometry(QtCore.QRect(150, 490, 91, 41))
-		self.tv_destination.setObjectName("tv_destination")
+		self.tv_inlet = QtWidgets.QLineEdit(self.centralwidget)
+		self.tv_inlet.setGeometry(QtCore.QRect(20, 490, 101, 41))
+		self.tv_inlet.setObjectName("tv_inlet")
+		self.tv_outlet = QtWidgets.QLineEdit(self.centralwidget)
+		self.tv_outlet.setGeometry(QtCore.QRect(150, 490, 91, 41))
+		self.tv_outlet.setObjectName("tv_outlet")
 		self.label_3 = QtWidgets.QLabel(self.centralwidget)
 		self.label_3.setGeometry(QtCore.QRect(30, 470, 67, 17))
 		self.label_3.setObjectName("label_3")
@@ -102,9 +102,9 @@ class Ui_MainWindow(object):
 		self.line_5.setFrameShape(QtWidgets.QFrame.HLine)
 		self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
 		self.line_5.setObjectName("line_5")
-		self.tv_voltage = QtWidgets.QLineEdit(self.centralwidget)
-		self.tv_voltage.setGeometry(QtCore.QRect(270, 490, 121, 41))
-		self.tv_voltage.setObjectName("tv_voltage")
+		self.tv_pressure = QtWidgets.QLineEdit(self.centralwidget)
+		self.tv_pressure.setGeometry(QtCore.QRect(270, 490, 121, 41))
+		self.tv_pressure.setObjectName("tv_pressure")
 		self.label_5 = QtWidgets.QLabel(self.centralwidget)
 		self.label_5.setGeometry(QtCore.QRect(270, 470, 121, 21))
 		self.label_5.setObjectName("label_5")
@@ -158,12 +158,12 @@ class Ui_MainWindow(object):
 		self.btn_show_new.setToolTip(_translate("MainWindow", "Display Simplified pipe network"))
 		self.btn_show_new.setText(_translate("MainWindow", "NEW NETWORK"))
 		self.label_2.setText(_translate("MainWindow", " Inlet, Outlet, Conductance"))
-		self.tv_source.setToolTip(_translate("MainWindow", "Inlet in the Orignial Network"))
-		self.tv_destination.setToolTip(_translate("MainWindow", "Outlet in The Original Network"))
+		self.tv_inlet.setToolTip(_translate("MainWindow", "Inlet in the Orignial Network"))
+		self.tv_outlet.setToolTip(_translate("MainWindow", "Outlet in The Original Network"))
 		self.label_3.setText(_translate("MainWindow", "Inlet"))
 		self.label_4.setText(_translate("MainWindow", "Outlet"))
 		self.label_5.setText(_translate("MainWindow", "Pressure difference Applied"))
-		self.tv_voltage.setToolTip(_translate("MainWindow", "Positive to Vertex"))
+		self.tv_pressure.setToolTip(_translate("MainWindow", "Positive to Vertex"))
 
 
 
@@ -187,9 +187,9 @@ class Ui_MainWindow(object):
 		self.reduced_elements=[]
 		self.tv_input.clear()
 		self.tv_result.clear()
-		self.tv_source.clear()
-		self.tv_destination.clear()
-		self.tv_voltage.clear()
+		self.tv_inlet.clear()
+		self.tv_outlet.clear()
+		self.tv_pressure.clear()
 		self.statusBar.showMessage("")
 		self.graph.nodes=0
 		self.graph.setadjMatrix()
@@ -248,39 +248,39 @@ class Ui_MainWindow(object):
 		self.graph.setadjMatrix()
 		
 		self.graph.gui_input(self.reduced_elements)
-		source,destination,voltage=-1,-1,0.0
+		inlet,outlet,pressure=-1,-1,0.0
 		
 		try:
-			source=int(self.tv_source.text())
-			destination=int(self.tv_destination.text())
-			voltage=float(self.tv_voltage.text())
-			if (source,destination) in self.graph.shorted:
+			inlet=int(self.tv_inlet.text())
+			outlet=int(self.tv_outlet.text())
+			pressure=float(self.tv_pressure.text())
+			if (inlet,outlet) in self.graph.shorted:
 				self.tv_result.setText("Zero(Shorted)")
 				return
-			if(voltage<0.0):
+			if(pressure<0.0):
 				raise ValueError
-			if(source < 0 or source >=self.graph.nodes):
+			if(inlet < 0 or inlet >=self.graph.nodes):
 				raise ValueError
-			if(destination < 0 or destination >=self.graph.nodes):
+			if(outlet < 0 or outlet >=self.graph.nodes):
 				raise ValueError 
 		except(ValueError,IndexError,TypeError):
-			self.statusBar.showMessage("Invalid Input Source or Destination")
+			self.statusBar.showMessage("Invalid Input inlet or outlet")
 
-		nsource=self.graph.new_Source(source)
-		ndestination=self.graph.new_Destination(destination)
-		print("nsource,ndestination",str(nsource),str(ndestination))
+		ninlet=self.graph.new_inlet(inlet)
+		noutlet=self.graph.new_outlet(outlet)
+		print("ninlet,noutlet",str(ninlet),str(noutlet))
 
 
-		net_resistance,voltage_nodes=self.graph.make_eqns(nsource,ndestination,1)
-		netCurrent=voltage/net_resistance
-		net_voltage,voltage_nodes=self.graph.make_eqns(nsource,ndestination,netCurrent)
-		currents_wire,power_wire=self.graph.calc_current_node(voltage_nodes,self.reduced_elements)
+		net_conductance,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,1)
+		netCurrent=pressure/net_conductance
+		net_pressure,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,netCurrent)
+		currents_wire,power_wire=self.graph.calc_current_node(pressure_nodes,self.reduced_elements)
 		print("Current Supplied=",netCurrent)
 		# print(currents_wire)
 		# print(power_wire)
 		copy=[x[:] for x in currents_wire]
 		self.drawgraph_final(copy,power_wire)
-		self.tv_result.setText(str(net_resistance))
+		self.tv_result.setText(str(net_conductance))
 
 def createWindow():
 	app=QtWidgets.QApplication(sys.argv)

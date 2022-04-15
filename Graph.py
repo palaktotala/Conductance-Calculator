@@ -94,11 +94,11 @@ class Graph:
 		self.adjMatrix=[[-1]*self.nodes for i in range(self.nodes)]
 		self.rhs=[0.0]*self.nodes
 
-	def add_edge(self,node1,node2,resistance):
+	def add_edge(self,node1,node2,conductance):
 		if(node1==node2):
 			return
-		self.adjMatrix[node1][node2]=resistance
-		self.adjMatrix[node2][node1]=resistance
+		self.adjMatrix[node1][node2]=conductance
+		self.adjMatrix[node2][node1]=conductance
 
 	#changing here		
 	def gui_input(self,arrinput):
@@ -108,15 +108,15 @@ class Graph:
 			else:
 				r1=self.adjMatrix[arrinput[i][0]][arrinput[i][1]]
 				r2=arrinput[i][2]
-				equivalent_resistance=(1/r1)+(1/r2)
-				equivalent_resistance=1/equivalent_resistance
-				self.add_edge(arrinput[i][0],arrinput[i][1],equivalent_resistance)
+				equivalent_conductance=(1/r1)+(1/r2)
+				equivalent_conductance=1/equivalent_conductance
+				self.add_edge(arrinput[i][0],arrinput[i][1],equivalent_conductance)
 
 
 
 
 	
-	def make_eqns(self,source,destination,netCurrent):
+	def make_eqns(self,inlet,outlet,netCurrent):
 		coeffs=[[0.0]*self.nodes for i in range(self.nodes)]
 
 		print(self.adjMatrix)
@@ -135,11 +135,11 @@ class Graph:
 
 
 		
-		self.rhs[source]=netCurrent
-		self.rhs[destination]=-1.0*netCurrent
+		self.rhs[inlet]=netCurrent
+		self.rhs[outlet]=-1.0*netCurrent
 
 		#reducing 1 Variable
-		n=max(source,destination)
+		n=max(inlet,outlet)
 		#removed variable of Node n by substituting Vn=0.0Volts
 		# newcoeffs=[[0.0]*(self.nodes-1) for i in range(self.nodes)]
 		newcoeffs=[]
@@ -151,18 +151,18 @@ class Graph:
 		self.solver(M)
 
 		copy=[x[:] for x in M]
-		voltage=self.calc_voltage(copy,max(source,destination))
+		pressure=self.calc_pressure(copy,max(inlet,outlet))
 		
 
-		return abs(M[min(source, destination)][-1]),voltage
+		return abs(M[min(inlet, outlet)][-1]),pressure
 
 
 
 	def zero_case(self,list):
 		replaced=[]
 		for index,i in enumerate(list):
-			resistance=i[2]
-			if(resistance==0):
+			conductance=i[2]
+			if(conductance==0):
 				a=min(i[0],i[1])
 				b=max(i[0],i[1])
 				replaced.append((a,b))
@@ -187,45 +187,45 @@ class Graph:
 
 		return list[:]
 
-	def new_Source(self,source):
+	def new_inlet(self,inlet):
 		
 		flag=False
 		for (a,b) in self.shorted:
-			if(source==b):
-				source=a
+			if(inlet==b):
+				inlet=a
 				flag=True
 				break
 
 		if(not(flag)):
 			for index,(a,b) in enumerate(self.shorted):
-				if(source>b):
-					source=source-len(self.shorted[index:])
+				if(inlet>b):
+					inlet=inlet-len(self.shorted[index:])
 					break
 
 		
-		return source
+		return inlet
 
 
-	def new_Destination(self,dest):
+	def new_outlet(self,out):
 		
 		flag=False
 		for (a,b) in self.shorted:
-			if(dest==b):
-				dest=a
+			if(out==b):
+				out=a
 				flag=True
 				break
 
 		if(not(flag)):
 			for index,(a,b) in enumerate(self.shorted):
-				if(dest>b):
-					dest=dest-len(self.shorted[index:])
+				if(out>b):
+					out=out-len(self.shorted[index:])
 					break
 
 		
-		return dest
+		return out
 
-	def is_Shorted(self,source,destination):
-		return ((source,destination) in self.shorted)
+	def is_Shorted(self,inlet,outlet):
+		return ((inlet,outlet) in self.shorted)
 
 	def solver(self,m, eps = 1.0/(10**10)):
 		h=len(m)
@@ -245,7 +245,7 @@ class Graph:
 				m[y][x] /= c
 
 
-	def calc_voltage(self,M,x):
+	def calc_pressure(self,M,x):
 		volt=[0]*(len(M)+1)
 		j=0
 		for i in range(0,len(M)):
@@ -256,9 +256,9 @@ class Graph:
 				j+=1
 		return volt
       
-	def calc_current_node(self,volt,resistances):
+	def calc_current_node(self,volt,conductances):
 		t=len(volt)
-		x=len(resistances)
+		x=len(conductances)
 		currents=[[]for i in range(t)]
 		fcurr=[[]for i in range(x)]
 		power=[[]for i in range(t)]
@@ -267,7 +267,7 @@ class Graph:
 			for j in range(t):
 				currents[i].append([])
 				power[i].append([])
-		for i in resistances:
+		for i in conductances:
 			volt_diff=volt[i[1]]-volt[i[0]]
 			cur=volt_diff/i[2]
 			currents[i[0]][i[1]].append(cur)
