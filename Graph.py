@@ -79,14 +79,9 @@ class Graph:
 		self.adjMatrix=[[-1]*self.nodes for i in range(self.nodes)]
 		self.rhs=[0.0]*self.nodes
 
-	def add_edge(self,node1,node2,conductance, eps = 1.0/(10**10)):
+	def add_edge(self,node1,node2,conductance):
 		if(node1==node2):
 			return
-
-		# if (conductance == 0.0):
-		# 	conductance = 1.0/eps
-		# else:
-		# 	conductance = 1.0/float(conductance)
 
 		self.adjMatrix[node1][node2]=conductance
 		self.adjMatrix[node2][node1]=conductance
@@ -100,8 +95,6 @@ class Graph:
 				r1=self.adjMatrix[arrinput[i][0]][arrinput[i][1]]
 				r2=float(arrinput[i][2])
 				equivalent_conductance=(1/r1)+(1/r2)
-				# equivalent_conductance= r1 + r2
-				
 				equivalent_conductance=1/equivalent_conductance
 				self.add_edge(arrinput[i][0],arrinput[i][1],equivalent_conductance)
 
@@ -121,9 +114,6 @@ class Graph:
 				if(index!=z and self.adjMatrix[z][index]!=-1):
 					coeffs[z][index]=-float(1/self.adjMatrix[z][index])
 
-
-
-		
 		self.rhs[inlet]=netflow
 		self.rhs[outlet]=-1.0*netflow
 
@@ -144,7 +134,6 @@ class Graph:
 		
 
 		return abs(M[min(inlet, outlet)][-1]),pressure
-
 
 
 	def zero_case(self,list):
@@ -220,17 +209,26 @@ class Graph:
 		h=len(m)
 		w=len(m[0])
 		for y in range(0,h):
-			for y2 in range(y+1, h):    # Eliminate column y
+
+			# Eliminate column y
+			for y2 in range(y+1, h):    
 				c = m[y2][y] / m[y][y]
+
 				for x in range(y, w):
-					m[y2][x] =m[y2][x]- m[y][x] * c
-		for y in range(h-1, 0-1, -1): # Backsubstitute
+					m[y2][x] = m[y2][x]- m[y][x] * c
+		
+		# Backsubstitute
+		for y in range(h-1, 0-1, -1):
 			c  = m[y][y]
+
 			for y2 in range(0,y):
 				for x in range(w-1, y-1, -1):
 					m[y2][x] = m[y2][x] -  m[y][x] * m[y2][y] / c
+					
 			m[y][y] /= c
-			for x in range(h, w):       # Normalize row y
+
+			# Normalize row y
+			for x in range(h, w):       
 				m[y][x] /= c
 
 

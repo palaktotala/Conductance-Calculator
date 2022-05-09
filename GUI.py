@@ -270,7 +270,6 @@ class Ui_MainWindow(object):
 		noutlet=self.graph.new_outlet(outlet)
 		print("ninlet,noutlet",str(ninlet),str(noutlet))
 
-
 		net_conductance,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,1)
 		netFlow=pressure/net_conductance
 		net_pressure,pressure_nodes=self.graph.make_eqns(ninlet,noutlet,netFlow)
